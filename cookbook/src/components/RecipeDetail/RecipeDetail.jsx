@@ -39,6 +39,9 @@ const RecipeDetail = ({ recipe, isFavorite, onBack, onAddToFavorites, onRemoveFr
     }
   };
 
+  // Проверяем, есть ли у шагов изображения
+  const hasStepImages = recipe.instructions && recipe.instructions.some(step => step.image);
+
   return (
     <div className="recipe-detail">
       <div className="detail-header">
@@ -95,11 +98,21 @@ const RecipeDetail = ({ recipe, isFavorite, onBack, onAddToFavorites, onRemoveFr
         
         <div className="detail-section">
           <h2 className="section-title">Способ приготовления</h2>
-          <ol className="instructions-list">
+          <div className="instructions-container">
             {recipe.instructions.map((instruction, index) => (
-              <li key={index}>{instruction}</li>
+              <div key={index} className="instruction-step">
+                <div className="step-number-large">{index + 1}</div>
+                <div className="step-content">
+                  <p className="step-text">{instruction.text}</p>
+                  {instruction.image && (
+                    <div className="step-image">
+                      <img src={instruction.image} alt={`Шаг ${index + 1}`} />
+                    </div>
+                  )}
+                </div>
+              </div>
             ))}
-          </ol>
+          </div>
         </div>
       </div>
     </div>

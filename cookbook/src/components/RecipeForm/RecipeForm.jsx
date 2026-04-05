@@ -25,14 +25,15 @@ const difficulties = {
 const RecipeForm = ({ onSubmit, onCancel }) => {
   const [recipe, setRecipe] = useState({
     name: '',
-    image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400',
+    image: null,
+    imagePreview: '',
     description: '',
     category: 'dinner',
     cuisine: 'russian',
     cookTime: 30,
     difficulty: 'medium',
     ingredients: [''],
-    instructions: ['']
+    instructions: [{ text: '', image: null, imagePreview: '' }]
   });
 
   const handleChange = (e) => {
@@ -43,6 +44,19 @@ const RecipeForm = ({ onSubmit, onCancel }) => {
     });
   };
 
+  // Обработка загрузки главного изображения
+  const handleMainImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const previewUrl = URL.createObjectURL(file);
+      setRecipe({
+        ...recipe,
+        image: file,
+        imagePreview: previewUrl
+      });
+    }
+  };
+
   const handleIngredientChange = (index, value) => {
     const newIngredients = [...recipe.ingredients];
     newIngredients[index] = value;
@@ -51,8 +65,22 @@ const RecipeForm = ({ onSubmit, onCancel }) => {
 
   const handleInstructionChange = (index, value) => {
     const newInstructions = [...recipe.instructions];
-    newInstructions[index] = value;
+    newInstructions[index] = { ...newInstructions[index], text: value };
     setRecipe({ ...recipe, instructions: newInstructions });
+  };
+
+  const handleInstructionImageChange = (index, e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const previewUrl = URL.createObjectURL(file);
+      const newInstructions = [...recipe.instructions];
+      newInstructions[index] = { 
+        ...newInstructions[index], 
+        image: file, 
+        imagePreview: previewUrl 
+      };
+      setRecipe({ ...recipe, instructions: newInstructions });
+    }
   };
 
   const addIngredient = () => {
@@ -65,7 +93,10 @@ const RecipeForm = ({ onSubmit, onCancel }) => {
   };
 
   const addInstruction = () => {
-    setRecipe({ ...recipe, instructions: [...recipe.instructions, ''] });
+    setRecipe({ 
+      ...recipe, 
+      instructions: [...recipe.instructions, { text: '', image: null, imagePreview: '' }] 
+    });
   };
 
   const removeInstruction = (index) => {
@@ -76,13 +107,58 @@ const RecipeForm = ({ onSubmit, onCancel }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    const filteredRecipe = {
-      ...recipe,
-      ingredients: recipe.ingredients.filter(ing => ing.trim() !== ''),
-      instructions: recipe.instructions.filter(step => step.trim() !== '')
+    // Подготовка данных для отправки
+    const formData = new FormData();
+    
+    // Добавляем основные поля
+    formData.append('name', recipe.name);
+    formData.append('description', recipe.description);
+    formData.append('category', recipe.category);
+    formData.append('cuisine', recipe.cuisine);
+    formData.append('cookTime', recipe.cookTime);
+    formData.append('difficulty', recipe.difficulty);
+    
+    // Добавляем главное изображение
+    if (recipe.image) {
+      formData.append('mainImage', recipe.image);
+    }
+    
+    // Добавляем ингредиенты
+    const validIngredients = recipe.ingredients.filter(ing => ing.trim() !== '');
+    formData.append('ingredients', JSON.stringify(validIngredients));
+    
+    // Добавляем шаги с изображениями
+    const validInstructions = recipe.instructions.filter(step => step.text.trim() !== '');
+    const instructionsData = validInstructions.map(step => ({
+      text: step.text,
+      hasImage: !!step.image
+    }));
+    formData.append('instructions', JSON.stringify(instructionsData));
+    
+    // Добавляем изображения шагов
+    validInstructions.forEach((step, index) => {
+      if (step.image) {
+        formData.append(`stepImage_${index}`, step.image);
+      }
+    });
+    
+    // Для локального хранения (без бэкенда) преобразуем в объект
+    const recipeData = {
+      name: recipe.name,
+      description: recipe.description,
+      category: recipe.category,
+      cuisine: recipe.cuisine,
+      cookTime: recipe.cookTime,
+      difficulty: recipe.difficulty,
+      image: recipe.imagePreview || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400',
+      ingredients: validIngredients,
+      instructions: validInstructions.map(step => ({
+        text: step.text,
+        image: step.imagePreview || null
+      }))
     };
     
-    onSubmit(filteredRecipe);
+    onSubmit(recipeData);
   };
 
   return (
@@ -101,6 +177,22 @@ const RecipeForm = ({ onSubmit, onCancel }) => {
               required
               placeholder="Введите название рецепта"
             />
+          </label>
+        </div>
+
+        <div className="form-section">
+          <label>
+            Главное изображение блюда
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleMainImageChange}
+            />
+            {recipe.imagePreview && (
+              <div className="image-preview">
+                <img src={recipe.imagePreview} alt="Предпросмотр" />
+              </div>
+            )}
           </label>
         </div>
 
@@ -199,42 +291,57 @@ const RecipeForm = ({ onSubmit, onCancel }) => {
         <div className="form-section">
           <label>Шаги приготовления *</label>
           {recipe.instructions.map((instruction, index) => (
-            <div key={index} className="instruction-row">
-              <div className="step-number">{index + 1}</div>
-              <textarea
-                value={instruction}
-                onChange={(e) => handleInstructionChange(index, e.target.value)}
-                placeholder={`Шаг ${index + 1}`}
-                rows="2"
-                required={index === 0}
-              />
-              {recipe.instructions.length > 1 && (
+            <div key={index} className="instruction-block">
+              <div className="instruction-header">
+                <div className="step-number">{index + 1}</div>
                 <button 
                   type="button" 
                   className="remove-btn"
                   onClick={() => removeInstruction(index)}
+                  disabled={recipe.instructions.length === 1}
                 >
                   ×
                 </button>
-              )}
+              </div>
+              <textarea
+                value={instruction.text}
+                onChange={(e) => handleInstructionChange(index, e.target.value)}
+                placeholder={`Опишите шаг ${index + 1}`}
+                rows="3"
+                required={index === 0}
+              />
+              <div className="instruction-image-section">
+                <label className="image-upload-label">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleInstructionImageChange(index, e.target.value)}
+                    style={{ display: 'none' }}
+                  />
+                  <span className="upload-btn">📷 Добавить фото для этого шага</span>
+                </label>
+                {instruction.imagePreview && (
+                  <div className="image-preview-small">
+                    <img src={instruction.imagePreview} alt={`Шаг ${index + 1}`} />
+                    <button 
+                      type="button"
+                      className="remove-image-btn"
+                      onClick={() => {
+                        const newInstructions = [...recipe.instructions];
+                        newInstructions[index] = { text: instruction.text, image: null, imagePreview: '' };
+                        setRecipe({ ...recipe, instructions: newInstructions });
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           ))}
           <button type="button" className="add-btn" onClick={addInstruction}>
             + Добавить шаг
           </button>
-        </div>
-
-        <div className="form-section">
-          <label>
-            Ссылка на изображение (необязательно)
-            <input
-              type="url"
-              name="image"
-              value={recipe.image}
-              onChange={handleChange}
-              placeholder="https://example.com/image.jpg"
-            />
-          </label>
         </div>
 
         <div className="form-actions">
