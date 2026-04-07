@@ -47,7 +47,7 @@ const RecipeList = ({
       <div className="list-header">
         <h1>{title} ({recipes.length})</h1>
         <button className="add-recipe-btn" onClick={onAddNew}>
-          + Добавить рецепт
+          Добавить рецепт
         </button>
       </div>
       

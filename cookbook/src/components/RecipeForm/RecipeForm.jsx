@@ -44,7 +44,6 @@ const RecipeForm = ({ onSubmit, onCancel }) => {
     });
   };
 
-  // Обработка загрузки главного изображения
   const handleMainImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -107,42 +106,9 @@ const RecipeForm = ({ onSubmit, onCancel }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Подготовка данных для отправки
-    const formData = new FormData();
-    
-    // Добавляем основные поля
-    formData.append('name', recipe.name);
-    formData.append('description', recipe.description);
-    formData.append('category', recipe.category);
-    formData.append('cuisine', recipe.cuisine);
-    formData.append('cookTime', recipe.cookTime);
-    formData.append('difficulty', recipe.difficulty);
-    
-    // Добавляем главное изображение
-    if (recipe.image) {
-      formData.append('mainImage', recipe.image);
-    }
-    
-    // Добавляем ингредиенты
     const validIngredients = recipe.ingredients.filter(ing => ing.trim() !== '');
-    formData.append('ingredients', JSON.stringify(validIngredients));
-    
-    // Добавляем шаги с изображениями
     const validInstructions = recipe.instructions.filter(step => step.text.trim() !== '');
-    const instructionsData = validInstructions.map(step => ({
-      text: step.text,
-      hasImage: !!step.image
-    }));
-    formData.append('instructions', JSON.stringify(instructionsData));
     
-    // Добавляем изображения шагов
-    validInstructions.forEach((step, index) => {
-      if (step.image) {
-        formData.append(`stepImage_${index}`, step.image);
-      }
-    });
-    
-    // Для локального хранения (без бэкенда) преобразуем в объект
     const recipeData = {
       name: recipe.name,
       description: recipe.description,
@@ -318,7 +284,7 @@ const RecipeForm = ({ onSubmit, onCancel }) => {
                     onChange={(e) => handleInstructionImageChange(index, e.target.value)}
                     style={{ display: 'none' }}
                   />
-                  <span className="upload-btn">📷 Добавить фото для этого шага</span>
+                  <span className="upload-btn">Добавить фото для этого шага</span>
                 </label>
                 {instruction.imagePreview && (
                   <div className="image-preview-small">
@@ -332,7 +298,7 @@ const RecipeForm = ({ onSubmit, onCancel }) => {
                         setRecipe({ ...recipe, instructions: newInstructions });
                       }}
                     >
-                      ✕
+                      ×
                     </button>
                   </div>
                 )}

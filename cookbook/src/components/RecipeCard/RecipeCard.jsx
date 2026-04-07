@@ -1,6 +1,4 @@
 import React from 'react';
-import { FiHeart } from 'react-icons/fi';
-import { FaHeart } from 'react-icons/fa';
 import './RecipeCard.css';
 
 const categories = {
@@ -26,6 +24,8 @@ const RecipeCard = ({ recipe, isFavorite, onSelect, onAddToFavorites, onRemoveFr
     }
   };
 
+  const favoriteIcon = isFavorite ? "♥" : "♡";
+
   return (
     <div className="recipe-card" onClick={() => onSelect(recipe)}>
       <img src={recipe.image} alt={recipe.name} className="recipe-image" />
@@ -39,20 +39,14 @@ const RecipeCard = ({ recipe, isFavorite, onSelect, onAddToFavorites, onRemoveFr
             className={`favorite-btn ${isFavorite ? 'active' : ''}`}
             onClick={handleFavoriteClick}
           >
-            {isFavorite ? <FaHeart /> : <FiHeart />}
+            {favoriteIcon}
           </button>
         </div>
         
         <div className="recipe-meta">
-          <span className="meta-item">
-            <span className="meta-icon">⏱️</span> {recipe.cookTime} мин
-          </span>
-          <span className="meta-item">
-            <span className="meta-icon">📊</span> {difficulties[recipe.difficulty]}
-          </span>
-          <span className="meta-item">
-            <span className="meta-icon">🏷️</span> {categories[recipe.category]}
-          </span>
+          <span className="meta-item">{recipe.cookTime} мин</span>
+          <span className="meta-item">{difficulties[recipe.difficulty]}</span>
+          <span className="meta-item">{categories[recipe.category]}</span>
         </div>
         
         <p className="recipe-description">{recipe.description}</p>

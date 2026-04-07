@@ -1,6 +1,4 @@
 import React from 'react';
-import { FiHeart } from 'react-icons/fi';
-import { FaHeart } from 'react-icons/fa';
 import './RecipeDetail.css';
 
 const categories = {
@@ -39,8 +37,7 @@ const RecipeDetail = ({ recipe, isFavorite, onBack, onAddToFavorites, onRemoveFr
     }
   };
 
-  // Проверяем, есть ли у шагов изображения
-  const hasStepImages = recipe.instructions && recipe.instructions.some(step => step.image);
+  const favoriteIcon = isFavorite ? "♥" : "♡";
 
   return (
     <div className="recipe-detail">
@@ -70,7 +67,7 @@ const RecipeDetail = ({ recipe, isFavorite, onBack, onAddToFavorites, onRemoveFr
             className={`favorite-btn ${isFavorite ? 'active' : ''}`}
             onClick={handleFavoriteClick}
           >
-            {isFavorite ? <FaHeart /> : <FiHeart />}
+            {favoriteIcon}
           </button>
         </div>
         

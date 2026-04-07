@@ -1,5 +1,4 @@
 import React from 'react';
-import { FiBookOpen, FiHeart, FiPlus } from 'react-icons/fi';
 import './Header.css';
 
 const Header = ({ onViewChange, currentView, favoritesCount, onSearch }) => {
@@ -7,30 +6,26 @@ const Header = ({ onViewChange, currentView, favoritesCount, onSearch }) => {
     <header className="header">
       <div className="header-content">
         <div className="logo" onClick={() => onViewChange('list')}>
-          <FiBookOpen className="logo-icon" />
-          <span>Книга рецептов</span>
+          <span>Кулинарная</span> книга
         </div>
         <div className="nav-buttons">
           <button 
             className={`nav-btn ${currentView === 'list' ? 'active' : ''}`}
             onClick={() => onViewChange('list')}
           >
-            <FiBookOpen />
-            <span>Все рецепты</span>
+            Все рецепты
           </button>
           <button 
             className={`nav-btn ${currentView === 'favorites' ? 'active' : ''}`}
             onClick={() => onViewChange('favorites')}
           >
-            <FiHeart />
-            <span>Избранное ({favoritesCount})</span>
+            Избранное ({favoritesCount})
           </button>
           <button 
             className="nav-btn add-recipe-btn"
             onClick={() => onViewChange('add')}
           >
-            <FiPlus />
-            <span>Добавить рецепт</span>
+            Добавить рецепт
           </button>
         </div>
       </div>
