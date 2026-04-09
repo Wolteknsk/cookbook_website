@@ -1,8 +1,7 @@
 .header {
-  background: #9a5d41 100%;
+  background: linear-gradient(135deg, #901f27 0%, #640a0d 100%);
   color: #fcf0c8;
   padding: 1rem 0;
-  box-shadow: 0 4px 12px rgba(100, 10, 13, 0.2);
 }
 
 .header-content {
@@ -12,14 +11,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
 }
 
 .logo {
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   font-weight: bold;
   cursor: pointer;
-  font-family: 'Georgia', serif;
-  letter-spacing: 1px;
 }
 
 .logo span {
@@ -28,79 +27,40 @@
 
 .nav-buttons {
   display: flex;
-  gap: 15px;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .nav-btn {
-  background: rgba(247, 208, 153, 0.15);
+  background: rgba(247, 208, 153, 0.2);
   border: 1px solid #f7d099;
   color: #fcf0c8;
   padding: 8px 18px;
   border-radius: 30px;
   cursor: pointer;
-  transition: all 0.3s;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 1rem;
-  font-family: 'Georgia', serif;
 }
 
-.nav-btn:hover {
+.nav-btn:hover, .nav-btn.active {
   background: #f7d099;
   color: #640a0d;
-  border-color: #f7d099;
-}
-
-.nav-btn.active {
-  background: #f7d099;
-  color: #640a0d;
-  border-color: #f7d099;
 }
 
 .add-recipe-btn {
   background: #f7d099;
   color: #640a0d;
-  border-color: #f7d099;
 }
 
-.add-recipe-btn:hover {
-  background: #fcf0c8;
-  color: #901f27;
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.search-bar {
-  margin-top: 15px;
-  text-align: center;
-}
-
-.search-input {
-  width: 100%;
-  max-width: 450px;
-  padding: 12px 20px;
-  border: 2px solid #f7d099;
-  border-radius: 40px;
-  font-size: 16px;
-  background: #fcf0c8;
-  color: #333;
-  font-family: 'Georgia', serif;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: #901f27;
-  box-shadow: 0 0 0 3px rgba(144, 31, 39, 0.1);
-}
-
-@media (max-width: 768px) {
-  .header-content {
-    flex-direction: column;
-    gap: 15px;
-    text-align: center;
-  }
-  
-  .nav-buttons {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
+.logout-btn, .login-btn {
+  background: #f7d099;
+  color: #640a0d;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 30px;
+  cursor: pointer;
 }

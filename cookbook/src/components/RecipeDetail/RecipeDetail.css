@@ -257,3 +257,15 @@
     font-size: 1rem;
   }
 }
+
+.step-image {
+  margin-top: 15px;
+}
+
+.step-image img {
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid #f7d099;
+}

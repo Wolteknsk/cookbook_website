@@ -1,0 +1,91 @@
+.auth-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.auth-container {
+  background: #fcf0c8;
+  border-radius: 20px;
+  padding: 40px;
+  width: 400px;
+  position: relative;
+}
+
+.close-btn {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 30px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.auth-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #640a0d;
+}
+
+.auth-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.auth-tabs button {
+  flex: 1;
+  padding: 10px;
+  background: #f7d099;
+  border: none;
+  cursor: pointer;
+  border-radius: 10px;
+}
+
+.auth-tabs button.active {
+  background: #901f27;
+  color: white;
+}
+
+.auth-container input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 2px solid #f7d099;
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+.auth-container button[type="submit"] {
+  width: 100%;
+  padding: 12px;
+  background: #901f27;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.error {
+  color: #901f27;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.test-account {
+  margin-top: 20px;
+  padding: 10px;
+  background: #f7d099;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 12px;
+}

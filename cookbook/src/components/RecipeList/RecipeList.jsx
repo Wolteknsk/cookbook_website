@@ -24,31 +24,60 @@ const difficulties = {
 };
 
 const RecipeList = ({ 
-  recipes, 
-  favorites, 
+  recipes = [],
+  favorites = [],
   onRecipeSelect, 
   onAddToFavorites, 
   onRemoveFromFavorites,
-  filters,
+  filters = {},
   onFilterChange,
   showFilters = true,
   title = "Все рецепты",
-  onAddNew
+  onAddNew,
+  user
 }) => {
   const handleFilterChange = (filterType, value) => {
-    onFilterChange({
-      ...filters,
-      [filterType]: value
-    });
+    if (onFilterChange) {
+      onFilterChange({
+        ...filters,
+        [filterType]: value
+      });
+    }
   };
+
+  // Если рецептов нет
+  if (!recipes || recipes.length === 0) {
+    return (
+      <div className="recipe-list">
+        <div className="list-header">
+          <h1>{title} (0)</h1>
+          {user && (
+            <button className="add-recipe-btn" onClick={onAddNew}>
+              Добавить рецепт
+            </button>
+          )}
+        </div>
+        <div className="no-recipes">
+          <p>Рецептов пока нет</p>
+          {user && (
+            <button className="text-btn" onClick={onAddNew}>
+              Добавить первый рецепт
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="recipe-list">
       <div className="list-header">
         <h1>{title} ({recipes.length})</h1>
-        <button className="add-recipe-btn" onClick={onAddNew}>
-          Добавить рецепт
-        </button>
+        {user && (
+          <button className="add-recipe-btn" onClick={onAddNew}>
+            Добавить рецепт
+          </button>
+        )}
       </div>
       
       {showFilters && (
@@ -56,7 +85,7 @@ const RecipeList = ({
           <div className="filter-row">
             <select 
               className="filter-select"
-              value={filters.category}
+              value={filters.category || ''}
               onChange={(e) => handleFilterChange('category', e.target.value)}
             >
               <option value="">Все категории</option>
@@ -67,7 +96,7 @@ const RecipeList = ({
 
             <select 
               className="filter-select"
-              value={filters.cuisine}
+              value={filters.cuisine || ''}
               onChange={(e) => handleFilterChange('cuisine', e.target.value)}
             >
               <option value="">Все кухни</option>
@@ -78,7 +107,7 @@ const RecipeList = ({
 
             <select 
               className="filter-select"
-              value={filters.maxCookTime}
+              value={filters.maxCookTime || ''}
               onChange={(e) => handleFilterChange('maxCookTime', e.target.value)}
             >
               <option value="">Любое время</option>
@@ -89,7 +118,7 @@ const RecipeList = ({
 
             <select 
               className="filter-select"
-              value={filters.difficulty}
+              value={filters.difficulty || ''}
               onChange={(e) => handleFilterChange('difficulty', e.target.value)}
             >
               <option value="">Любая сложность</option>
@@ -101,25 +130,18 @@ const RecipeList = ({
         </div>
       )}
 
-      {recipes.length === 0 ? (
-        <div className="no-recipes">
-          <p>Рецепты не найдены.</p>
-          <button className="text-btn" onClick={onAddNew}>Добавить свой первый рецепт</button>
-        </div>
-      ) : (
-        <div className="recipes-grid">
-          {recipes.map(recipe => (
-            <RecipeCard
-              key={recipe.id}
-              recipe={recipe}
-              isFavorite={favorites.some(fav => fav.id === recipe.id)}
-              onSelect={onRecipeSelect}
-              onAddToFavorites={onAddToFavorites}
-              onRemoveFromFavorites={onRemoveFromFavorites}
-            />
-          ))}
-        </div>
-      )}
+      <div className="recipes-grid">
+        {recipes.map(recipe => (
+          <RecipeCard
+            key={recipe.id}
+            recipe={recipe}
+            isFavorite={favorites.some(fav => fav && fav.id === recipe.id)}
+            onSelect={onRecipeSelect}
+            onAddToFavorites={onAddToFavorites}
+            onRemoveFromFavorites={onRemoveFromFavorites}
+          />
+        ))}
+      </div>
     </div>
   );
 };

@@ -5,8 +5,6 @@
 }
 
 body {
-  font-family: 'Georgia', 'Times New Roman', 'Segoe UI', serif;
+  font-family: 'Georgia', serif;
   background-color: #fcf0c8;
-  color: #333;
-  line-height: 1.6;
 }
