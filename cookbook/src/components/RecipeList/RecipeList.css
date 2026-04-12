@@ -1,5 +1,12 @@
 .recipe-list {
   margin-top: 20px;
+  width: 100%;
+}
+
+.recipes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 25px;
 }
 
 .list-header {

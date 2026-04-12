@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header/Header';
 import RecipeList from './components/RecipeList/RecipeList';
+import Footer from './components/Footer/Footer';
 import RecipeDetail from './components/RecipeDetail/RecipeDetail';
 import RecipeForm from './components/RecipeForm/RecipeForm';
 import { authService, recipeService } from './services/auth';
@@ -178,6 +179,7 @@ const handleAddRecipe = async (newRecipe) => {
           />
         )}
       </div>
+      <Footer />
     </div>
   );
 }

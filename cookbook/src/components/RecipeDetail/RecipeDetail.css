@@ -4,6 +4,7 @@
   box-shadow: 0 4px 20px rgba(100, 10, 13, 0.15);
   overflow: hidden;
   border: 1px solid #f7d099;
+  width: 100%;
 }
 
 .detail-header {
