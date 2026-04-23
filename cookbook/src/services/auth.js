@@ -87,6 +87,17 @@ export const recipeService = {
     }
   },
 
+  async getRecipeById(id) {
+    try {
+      const response = await fetch(`${API_URL}/recipes/${id}`);
+      if (!response.ok) throw new Error('Рецепт не найден');
+      return await response.json();
+    } catch (error) {
+      console.error('Ошибка получения рецепта:', error);
+      throw error;
+    }
+  },
+
   async createRecipe(recipeData) {
     const user = authService.getCurrentUser();
     const response = await fetch(`${API_URL}/recipes`, {

@@ -168,14 +168,14 @@ app.post('/api/recipes', upload.fields([
   }));
   
   db.run(`
-    INSERT INTO recipes (user_id, name, description, image, category, cuisine, cook_time, difficulty, ingredients, instructions, step_images)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  INSERT INTO recipes (user_id, name, description, image, category, cuisine, cook_time, difficulty, ingredients, instructions, step_images)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `, [
-    user_id, name, description || '', mainImagePath, category || 'dinner', 
-    cuisine || 'russian', cook_time || 30, difficulty || 'medium',
-    JSON.stringify(ingredientsArray), JSON.stringify(instructionsArray),
-    JSON.stringify(stepImagesPaths)
-  ], function(err) {
+  user_id, name, description || '', mainImagePath, category || 'dinner', cuisine || 'russian',
+  cook_time || 30, difficulty || 'medium',
+  JSON.stringify(ingredientsArray), JSON.stringify(instructionsArray),
+  JSON.stringify(stepImagesPaths)   // ← должно быть
+], function(err) {
     if (err) {
       console.error(err);
       return res.status(500).json({ error: 'Ошибка создания рецепта' });

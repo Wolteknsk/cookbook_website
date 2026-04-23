@@ -28,7 +28,11 @@ const RecipeCard = ({ recipe, isFavorite, onSelect, onAddToFavorites, onRemoveFr
 
   return (
     <div className="recipe-card" onClick={() => onSelect(recipe)}>
-      <img src={recipe.image} alt={recipe.name} className="recipe-image" />
+      <img 
+        src={recipe.image ? `http://localhost:3002${recipe.image}` : 'https://via.placeholder.com/300x200?text=No+Image'} 
+        alt={recipe.name} 
+        className="recipe-image" 
+      />
       {recipe.isUserRecipe && (
         <div className="user-badge">Ваш рецепт</div>
       )}
