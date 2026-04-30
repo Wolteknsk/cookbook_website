@@ -126,7 +126,7 @@ const RecipeDetail = ({ recipe, isFavorite, onBack, onAddToFavorites, onRemoveFr
         <div className="detail-title-row">
           <div>
             <h1 className="detail-title">{recipe.name}</h1>
-            {recipe.isUserRecipe && (
+            {user && recipe.user_id === user.id && (
               <span className="user-recipe-badge">Ваш рецепт</span>
             )}
           </div>

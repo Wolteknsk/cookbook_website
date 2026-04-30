@@ -14,7 +14,7 @@ const difficulties = {
   hard: "Сложно"
 };
 
-const RecipeCard = ({ recipe, isFavorite, onSelect, onAddToFavorites, onRemoveFromFavorites }) => {
+const RecipeCard = ({ recipe, isFavorite, onSelect, onAddToFavorites, onRemoveFromFavorites, user }) => {
   const handleFavoriteClick = (e) => {
     e.stopPropagation();
     if (isFavorite) {
@@ -23,7 +23,7 @@ const RecipeCard = ({ recipe, isFavorite, onSelect, onAddToFavorites, onRemoveFr
       onAddToFavorites(recipe);
     }
   };
-
+  const isUserRecipe = user && recipe.user_id === user.id;
   const favoriteIcon = isFavorite ? "♥" : "♡";
 
   return (
@@ -33,8 +33,10 @@ const RecipeCard = ({ recipe, isFavorite, onSelect, onAddToFavorites, onRemoveFr
         alt={recipe.name} 
         className="recipe-image" 
       />
-      {recipe.isUserRecipe && (
-        <div className="user-badge">Ваш рецепт</div>
+      {isUserRecipe && (
+        <div className="user-badge">
+          Ваш рецепт
+        </div>
       )}
       <div className="recipe-content">
         <div className="recipe-header">

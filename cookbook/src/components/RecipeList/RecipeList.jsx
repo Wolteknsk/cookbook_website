@@ -153,6 +153,7 @@ const RecipeList = ({
               onSelect={onRecipeSelect}
               onAddToFavorites={onAddToFavorites}
               onRemoveFromFavorites={onRemoveFromFavorites}
+              user={user}
             />
           ))}
         </div>
