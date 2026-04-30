@@ -148,7 +148,7 @@ const RecipeDetail = ({ recipe, isFavorite, onBack, onAddToFavorites, onRemoveFr
         </div>
         
         <div className="detail-meta">
-          <span>Время: {recipe.cook_time || recipe.cookTime || 30} минут</span>
+          <span>Время: {recipe.cook_time || recipe.cookTime} минут</span>
           <span>Сложность: {difficulties[recipe.difficulty] || recipe.difficulty || 'Средне'}</span>
           <span>Категория: {categories[recipe.category] || recipe.category || 'Обед'}</span>
           <span>Кухня: {cuisines[recipe.cuisine] || recipe.cuisine || 'Русская'}</span>

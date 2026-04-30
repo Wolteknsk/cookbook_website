@@ -50,7 +50,7 @@ const RecipeCard = ({ recipe, isFavorite, onSelect, onAddToFavorites, onRemoveFr
         </div>
         
         <div className="recipe-meta">
-          <span className="meta-item">{recipe.cookTime} мин</span>
+          <span className="meta-item">{recipe.cook_time || recipe.cookTime || '?'} мин</span>
           <span className="meta-item">{difficulties[recipe.difficulty]}</span>
           <span className="meta-item">{categories[recipe.category]}</span>
         </div>
