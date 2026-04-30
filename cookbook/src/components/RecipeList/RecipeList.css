@@ -79,6 +79,59 @@
   font-weight: bold;
 }
 
+/* Контейнер поиска */
+.search-container {
+  position: relative;
+  margin-bottom: 25px;
+  max-width: 500px;
+}
+
+.search-input-main {
+  width: 100%;
+  padding: 12px 40px 12px 20px;
+  border: 2px solid #f7d099;
+  border-radius: 40px;
+  font-size: 16px;
+  background: white;
+  font-family: 'Georgia', serif;
+  transition: all 0.3s;
+}
+
+.search-input-main:focus {
+  outline: none;
+  border-color: #901f27;
+  box-shadow: 0 0 0 3px rgba(144, 31, 39, 0.1);
+}
+
+.search-input-main::placeholder {
+  color: #aaa;
+  font-style: italic;
+}
+
+.search-clear {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #901f27;
+  padding: 0;
+  width: 25px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.search-clear:hover {
+  background: #f7d099;
+  color: #640a0d;
+}
+
 .text-btn:hover {
   color: #640a0d;
 }

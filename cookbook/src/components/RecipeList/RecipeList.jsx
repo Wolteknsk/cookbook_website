@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import RecipeCard from '../RecipeCard/RecipeCard';
 import './RecipeList.css';
 
@@ -24,8 +24,8 @@ const difficulties = {
 };
 
 const RecipeList = ({ 
-  recipes = [],
-  favorites = [],
+  recipes = [], 
+  favorites = [], 
   onRecipeSelect, 
   onAddToFavorites, 
   onRemoveFromFavorites,
@@ -36,6 +36,13 @@ const RecipeList = ({
   onAddNew,
   user
 }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Фильтрация по поиску
+  const filteredBySearch = recipes.filter(recipe =>
+    recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   const handleFilterChange = (filterType, value) => {
     if (onFilterChange) {
       onFilterChange({
@@ -45,37 +52,32 @@ const RecipeList = ({
     }
   };
 
-  // Если рецептов нет
-  if (!recipes || recipes.length === 0) {
-    return (
-      <div className="recipe-list">
-        <div className="list-header">
-          <h1>{title} (0)</h1>
-          {user && (
-            <button className="add-recipe-btn" onClick={onAddNew}>
-              Добавить рецепт
-            </button>
-          )}
-        </div>
-        <div className="no-recipes">
-          <p>Рецептов пока нет</p>
-          {user && (
-            <button className="text-btn" onClick={onAddNew}>
-              Добавить первый рецепт
-            </button>
-          )}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="recipe-list">
       <div className="list-header">
-        <h1>{title} ({recipes.length})</h1>
+        <h1>{title} ({filteredBySearch.length})</h1>
         {user && (
           <button className="add-recipe-btn" onClick={onAddNew}>
             Добавить рецепт
+          </button>
+        )}
+      </div>
+      
+      {/* ПОИСК НА ГЛАВНОЙ СТРАНИЦЕ */}
+      <div className="search-container">
+        <input
+          type="text"
+          placeholder="Поиск рецептов по названию..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="search-input-main"
+        />
+        {searchTerm && (
+          <button 
+            className="search-clear"
+            onClick={() => setSearchTerm('')}
+          >
+            ✕
           </button>
         )}
       </div>
@@ -130,18 +132,32 @@ const RecipeList = ({
         </div>
       )}
 
-      <div className="recipes-grid">
-        {recipes.map(recipe => (
-          <RecipeCard
-            key={recipe.id}
-            recipe={recipe}
-            isFavorite={favorites.some(fav => fav && fav.id === recipe.id)}
-            onSelect={onRecipeSelect}
-            onAddToFavorites={onAddToFavorites}
-            onRemoveFromFavorites={onRemoveFromFavorites}
-          />
-        ))}
-      </div>
+      {filteredBySearch.length === 0 ? (
+        <div className="no-recipes">
+          <p>Рецепты не найдены.</p>
+          {searchTerm && (
+            <p>По запросу <strong>"{searchTerm}"</strong> ничего не найдено</p>
+          )}
+          {user && (
+            <button className="text-btn" onClick={onAddNew}>
+              Добавить свой первый рецепт
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="recipes-grid">
+          {filteredBySearch.map(recipe => (
+            <RecipeCard
+              key={recipe.id}
+              recipe={recipe}
+              isFavorite={favorites.some(fav => fav && fav.id === recipe.id)}
+              onSelect={onRecipeSelect}
+              onAddToFavorites={onAddToFavorites}
+              onRemoveFromFavorites={onRemoveFromFavorites}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

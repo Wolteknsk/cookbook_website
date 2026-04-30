@@ -31,11 +31,29 @@ const RecipeDetail = ({ recipe, isFavorite, onBack, onAddToFavorites, onRemoveFr
     }
   };
 
-  const handleDeleteClick = () => {
-    if (window.confirm('Вы уверены, что хотите удалить этот рецепт?')) {
-      onDeleteRecipe(recipe.id);
+  const handleDeleteClick = async () => {
+  if (window.confirm('Вы уверены, что хотите удалить этот рецепт?')) {
+    try {
+      const response = await fetch(`http://localhost:3002/api/recipes/${recipe.id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: user?.id })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        alert('Рецепт удален');
+        onDeleteRecipe(recipe.id);
+      } else {
+        alert(data.error || 'Ошибка при удалении');
+      }
+    } catch (error) {
+      console.error('Ошибка:', error);
+      alert('Ошибка соединения с сервером');
     }
-  };
+  }
+};
 
   const favoriteIcon = isFavorite ? "♥" : "♡";
   const canDelete = recipe.user_id === user?.id;
