@@ -63,7 +63,6 @@ const RecipeList = ({
         )}
       </div>
       
-      {/* ПОИСК НА ГЛАВНОЙ СТРАНИЦЕ */}
       <div className="search-container">
         <input
           type="text"

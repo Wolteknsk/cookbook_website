@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header/Header';
 import RecipeList from './components/RecipeList/RecipeList';
-import Footer from './components/Footer/Footer';
 import RecipeDetail from './components/RecipeDetail/RecipeDetail';
 import RecipeForm from './components/RecipeForm/RecipeForm';
+import Footer from './components/Footer/Footer';
 import { authService, recipeService } from './services/auth';
 import './App.css';
 
@@ -11,9 +11,17 @@ function App() {
   const [currentView, setCurrentView] = useState('list');
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [recipes, setRecipes] = useState([]);
+  const [filteredRecipes, setFilteredRecipes] = useState([]);
   const [favorites, setFavorites] = useState([]);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState({
+    category: '',
+    cuisine: '',
+    maxCookTime: '',
+    difficulty: ''
+  });
 
   useEffect(() => {
     const currentUser = authService.getCurrentUser();
@@ -27,21 +35,53 @@ function App() {
     }
   }, [user]);
 
-const loadRecipes = async () => {
-  try {
-    const data = await recipeService.getAllRecipes();
-    if (data && Array.isArray(data)) {
-      setRecipes(data);
-    } else {
-      setRecipes([]);
+  // Фильтрация рецептов
+  useEffect(() => {
+    let result = [...recipes];
+
+    // Поиск по названию
+    if (searchTerm) {
+      result = result.filter(recipe =>
+        recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     }
-  } catch (error) {
-    console.error('Ошибка загрузки рецептов:', error);
-    setRecipes([]);
-  } finally {
-    setLoading(false);
-  }
-};
+
+    // Фильтр по категории
+    if (filters.category) {
+      result = result.filter(recipe => recipe.category === filters.category);
+    }
+
+    // Фильтр по кухне
+    if (filters.cuisine) {
+      result = result.filter(recipe => recipe.cuisine === filters.cuisine);
+    }
+
+    // Фильтр по времени
+    if (filters.maxCookTime) {
+      result = result.filter(recipe => {
+        const time = recipe.cook_time || recipe.cookTime || 0;
+        return time <= parseInt(filters.maxCookTime);
+      });
+    }
+
+    // Фильтр по сложности
+    if (filters.difficulty) {
+      result = result.filter(recipe => recipe.difficulty === filters.difficulty);
+    }
+
+    setFilteredRecipes(result);
+  }, [searchTerm, filters, recipes]);
+
+  const loadRecipes = async () => {
+    try {
+      const data = await recipeService.getAllRecipes();
+      setRecipes(data);
+    } catch (error) {
+      console.error('Ошибка загрузки рецептов:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadFavorites = async () => {
     try {
@@ -50,6 +90,14 @@ const loadRecipes = async () => {
     } catch (error) {
       console.error('Ошибка загрузки избранного:', error);
     }
+  };
+
+  const handleSearch = (term) => {
+    setSearchTerm(term);
+  };
+
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
   };
 
   const handleRecipeSelect = async (recipe) => {
@@ -64,7 +112,7 @@ const loadRecipes = async () => {
 
   const handleAddToFavorites = async (recipe) => {
     if (!user) {
-      alert('Войдите в систему, чтобы добавить в избранное');
+      alert('Войдите в систему');
       return;
     }
     try {
@@ -84,28 +132,31 @@ const loadRecipes = async () => {
     }
   };
 
-const handleAddRecipe = async (newRecipe) => {
-  if (!user) {
-    alert('Войдите в систему, чтобы добавить рецепт');
-    return;
-  }
-  try {
-    await recipeService.createRecipe(newRecipe);
-    await loadRecipes();
-    setCurrentView('list');
-  } catch (error) {
-    console.error('Ошибка:', error);
-    alert('Ошибка при создании рецепта');
-  }
-};
+  const handleAddRecipe = async (newRecipe) => {
+    if (!user) {
+      alert('Войдите в систему');
+      return;
+    }
+    try {
+      await recipeService.createRecipe(newRecipe);
+      await loadRecipes();
+      setCurrentView('list');
+    } catch (error) {
+      console.error('Ошибка:', error);
+      alert('Ошибка при создании рецепта');
+    }
+  };
 
   const handleDeleteRecipe = async (recipeId) => {
     try {
       await recipeService.deleteRecipe(recipeId);
       await loadRecipes();
       await loadFavorites();
-      setCurrentView('list');
+      if (selectedRecipe && selectedRecipe.id === recipeId) {
+        setCurrentView('list');
+      }
     } catch (error) {
+      console.error('Ошибка:', error);
       alert('Ошибка при удалении');
     }
   };
@@ -122,7 +173,7 @@ const handleAddRecipe = async (newRecipe) => {
   };
 
   if (loading) {
-    return <div style={{ textAlign: 'center', padding: '50px' }}>Загрузка...</div>;
+    return <div className="loading">Загрузка...</div>;
   }
 
   return (
@@ -134,19 +185,24 @@ const handleAddRecipe = async (newRecipe) => {
         user={user}
         onLoginSuccess={handleLoginSuccess}
         onLogout={handleLogout}
+        onSearch={handleSearch}
       />
+
       <div className="container">
         {currentView === 'list' && (
           <RecipeList
-            recipes={recipes}
+            recipes={filteredRecipes}
             favorites={favorites}
             onRecipeSelect={handleRecipeSelect}
             onAddToFavorites={handleAddToFavorites}
             onRemoveFromFavorites={handleRemoveFromFavorites}
+            filters={filters}
+            onFilterChange={handleFilterChange}
             onAddNew={() => setCurrentView('add')}
             user={user}
           />
         )}
+
         {currentView === 'detail' && selectedRecipe && (
           <RecipeDetail
             recipe={selectedRecipe}
@@ -158,6 +214,7 @@ const handleAddRecipe = async (newRecipe) => {
             user={user}
           />
         )}
+
         {currentView === 'favorites' && (
           <RecipeList
             recipes={favorites}
@@ -171,6 +228,7 @@ const handleAddRecipe = async (newRecipe) => {
             user={user}
           />
         )}
+
         {currentView === 'add' && (
           <RecipeForm
             onSubmit={handleAddRecipe}
@@ -179,6 +237,7 @@ const handleAddRecipe = async (newRecipe) => {
           />
         )}
       </div>
+
       <Footer />
     </div>
   );
