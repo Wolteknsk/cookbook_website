@@ -22,7 +22,7 @@ const difficulties = {
   hard: 'Сложно'
 };
 
-const RecipeDetail = ({ recipe, isFavorite, onBack, onAddToFavorites, onRemoveFromFavorites, onDeleteRecipe, user }) => {
+const RecipeDetail = ({ recipe, isFavorite, onBack, onAddToFavorites, onRemoveFromFavorites, onDeleteRecipe, user , showAlert }) => {
   const handleFavoriteClick = () => {
     if (isFavorite) {
       onRemoveFromFavorites(recipe.id);
@@ -32,7 +32,10 @@ const RecipeDetail = ({ recipe, isFavorite, onBack, onAddToFavorites, onRemoveFr
   };
 
   const handleDeleteClick = async () => {
-  if (window.confirm('Вы уверены, что хотите удалить этот рецепт?')) {
+    if (window.confirm('Вы уверены, что хотите удалить этот рецепт?')) {
+      console.log('Deleting recipe:', recipe.id);
+      console.log('User ID:', user?.id);
+    
     try {
       const response = await fetch('http://localhost:3002/api/recipes/' + recipe.id, {
         method: 'DELETE',
@@ -43,16 +46,22 @@ const RecipeDetail = ({ recipe, isFavorite, onBack, onAddToFavorites, onRemoveFr
       });
       
       const data = await response.json();
+      console.log('Response status:', response.status);
+      console.log('Response data:', data);
       
       if (response.ok) {
-        alert('Рецепт удален');
+        showAlert('Рецепт удален', 'success');
+        onDeleteRecipe(recipe.id);
+      } else if (response.status === 404) {
+        // Рецепт уже удалён или не найден
+        showAlert('Рецепт уже удален', 'info');
         onDeleteRecipe(recipe.id);
       } else {
-        alert(data.error || 'Ошибка при удалении');
+        showAlert(data.error || 'Ошибка при удалении рецепта', 'error');
       }
     } catch (error) {
       console.error('Ошибка:', error);
-      alert('Ошибка соединения с сервером');
+      showAlert('Ошибка при соединении с сервером', 'error');
     }
   }
 };

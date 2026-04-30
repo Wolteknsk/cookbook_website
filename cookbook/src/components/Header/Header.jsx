@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Auth from '../Auth/Auth';
 import './Header.css';
 
-const Header = ({ onViewChange, currentView, favoritesCount, user, onLoginSuccess, onLogout }) => {
+const Header = ({ onViewChange, currentView, favoritesCount, user, onLoginSuccess, onLogout, showAlert }) => {
   const [showAuth, setShowAuth] = useState(false);
 
   return (
@@ -37,7 +37,7 @@ const Header = ({ onViewChange, currentView, favoritesCount, user, onLoginSucces
         </div>
       </header>
       
-      {showAuth && <Auth onClose={() => setShowAuth(false)} onLoginSuccess={onLoginSuccess} />}
+      {showAuth && <Auth onClose={() => setShowAuth(false)} onLoginSuccess={onLoginSuccess} showAlert={showAlert} />}
     </>
   );
 };

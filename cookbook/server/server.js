@@ -179,34 +179,45 @@ app.post('/api/recipes', upload.fields([
 // Удаление рецепта вместе с файлами
 app.delete('/api/recipes/:id', (req, res) => {
   const { user_id } = req.body;
-  if (!user_id) return res.status(400).json({ error: 'User ID required' });
-
-  // Получаем пути к файлам перед удалением
-  db.get('SELECT image, step_images FROM recipes WHERE id = ? AND user_id = ?',
-    [req.params.id, user_id],
+  
+  console.log('DELETE recipe:', req.params.id, 'user:', user_id);
+  
+  if (!user_id) {
+    return res.status(400).json({ error: 'User ID required' });
+  }
+  
+  // Получаем пути к файлам
+  db.get('SELECT image, step_images FROM recipes WHERE id = ? AND user_id = ?', 
+    [req.params.id, user_id], 
     (err, recipe) => {
-      if (err || !recipe) return res.status(404).json({ error: 'Recipe not found' });
-
-      // Удаляем файлы с диска
+      if (err) {
+        return res.status(500).json({ error: 'Database error' });
+      }
+      
+      // Если рецепт не найден, всё равно возвращаем успех (он уже удалён)
+      if (!recipe) {
+        return res.json({ message: 'Recipe already deleted' });
+      }
+      
+      // Удаляем файлы
       const deleteFile = (filePath) => {
         if (!filePath) return;
         const fullPath = path.join(__dirname, filePath);
         fs.unlink(fullPath, (err) => {});
       };
-
+      
       if (recipe.image) deleteFile(recipe.image);
       if (recipe.step_images) {
         try {
           JSON.parse(recipe.step_images).forEach(deleteFile);
         } catch(e) {}
       }
-
-      // Удаляем из базы данных
-      db.run('DELETE FROM recipes WHERE id = ?', [req.params.id], function(err) {
-        if (err) return res.status(500).json({ error: 'Failed to delete' });
-        db.run('DELETE FROM favorites WHERE recipe_id = ?', [req.params.id]);
-        res.json({ message: 'Recipe deleted' });
-      });
+      
+      // Удаляем из БД
+      db.run('DELETE FROM recipes WHERE id = ?', [req.params.id]);
+      db.run('DELETE FROM favorites WHERE recipe_id = ?', [req.params.id]);
+      
+      res.json({ message: 'Recipe deleted' });
     });
 });
 

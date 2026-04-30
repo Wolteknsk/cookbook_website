@@ -16,12 +16,20 @@ function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [alertMessage, setAlertMessage] = useState(null);
   const [filters, setFilters] = useState({
     category: '',
     cuisine: '',
     maxCookTime: '',
     difficulty: ''
   });
+
+  const showAlert = (message, type = 'error') => {
+    setAlertMessage({ text: message, type: type });
+    setTimeout(() => {
+      setAlertMessage(null);
+    }, 3000);
+  };
 
   useEffect(() => {
     const currentUser = authService.getCurrentUser();
@@ -35,28 +43,23 @@ function App() {
     }
   }, [user]);
 
-  // Фильтрация рецептов
   useEffect(() => {
     let result = [...recipes];
 
-    // Поиск по названию
     if (searchTerm) {
       result = result.filter(recipe =>
         recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
-    // Фильтр по категории
     if (filters.category) {
       result = result.filter(recipe => recipe.category === filters.category);
     }
 
-    // Фильтр по кухне
     if (filters.cuisine) {
       result = result.filter(recipe => recipe.cuisine === filters.cuisine);
     }
 
-    // Фильтр по времени
     if (filters.maxCookTime) {
       result = result.filter(recipe => {
         const time = recipe.cook_time || recipe.cookTime || 0;
@@ -64,7 +67,6 @@ function App() {
       });
     }
 
-    // Фильтр по сложности
     if (filters.difficulty) {
       result = result.filter(recipe => recipe.difficulty === filters.difficulty);
     }
@@ -78,6 +80,7 @@ function App() {
       setRecipes(data);
     } catch (error) {
       console.error('Ошибка загрузки рецептов:', error);
+      showAlert('Ошибка загрузки рецептов', 'error');
     } finally {
       setLoading(false);
     }
@@ -107,19 +110,22 @@ function App() {
       setCurrentView('detail');
     } catch (error) {
       console.error('Ошибка:', error);
+      showAlert('Ошибка загрузки рецепта', 'error');
     }
   };
 
   const handleAddToFavorites = async (recipe) => {
     if (!user) {
-      alert('Войдите в систему');
+      showAlert('Войдите в систему, чтобы добавить в избранное', 'warning');
       return;
     }
     try {
       await recipeService.addToFavorites(recipe.id);
       await loadFavorites();
+      showAlert('Рецепт добавлен в избранное', 'success');
     } catch (error) {
       console.error('Ошибка:', error);
+      showAlert('Ошибка при добавлении в избранное', 'error');
     }
   };
 
@@ -127,49 +133,72 @@ function App() {
     try {
       await recipeService.removeFromFavorites(recipeId);
       await loadFavorites();
+      showAlert('Рецепт удален из избранного', 'success');
     } catch (error) {
       console.error('Ошибка:', error);
+      showAlert('Ошибка при удалении из избранного', 'error');
     }
   };
 
   const handleAddRecipe = async (newRecipe) => {
     if (!user) {
-      alert('Войдите в систему');
+      showAlert('Войдите в систему, чтобы добавить рецепт', 'warning');
       return;
     }
     try {
       await recipeService.createRecipe(newRecipe);
       await loadRecipes();
       setCurrentView('list');
+      showAlert('Рецепт успешно добавлен', 'success');
     } catch (error) {
       console.error('Ошибка:', error);
-      alert('Ошибка при создании рецепта');
+      showAlert('Ошибка при создании рецепта', 'error');
     }
   };
 
   const handleDeleteRecipe = async (recipeId) => {
-    try {
-      await recipeService.deleteRecipe(recipeId);
+  if (!user) {
+    showAlert('Войдите в систему, чтобы удалить рецепт', 'warning');
+    return;
+  }
+  try {
+    const response = await fetch('http://localhost:3002/api/recipes/' + recipeId, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ user_id: user.id })
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
       await loadRecipes();
       await loadFavorites();
       if (selectedRecipe && selectedRecipe.id === recipeId) {
         setCurrentView('list');
       }
-    } catch (error) {
-      console.error('Ошибка:', error);
-      alert('Ошибка при удалении');
+      showAlert('Рецепт удален', 'success');
+    } else {
+      showAlert(data.error || 'Ошибка при удалении рецепта', 'error');
     }
-  };
+  } catch (error) {
+    console.error('Ошибка:', error);
+    showAlert('Ошибка соединения с сервером', 'error');
+  }
+};
 
   const handleLoginSuccess = (loggedInUser) => {
     setUser(loggedInUser);
     loadFavorites();
+    showAlert('Добро пожаловать, ' + loggedInUser.name, 'success');
   };
 
   const handleLogout = () => {
     authService.logout();
     setUser(null);
     setFavorites([]);
+    showAlert('Вы вышли из системы', 'info');
   };
 
   if (loading) {
@@ -178,6 +207,12 @@ function App() {
 
   return (
     <div className="app">
+      {alertMessage && (
+        <div className={`alert-message ${alertMessage.type === 'success' ? 'success' : alertMessage.type === 'warning' ? 'warning' : alertMessage.type === 'info' ? 'info' : ''}`}>
+          {alertMessage.text}
+        </div>
+      )}
+      
       <Header
         onViewChange={setCurrentView}
         currentView={currentView}
@@ -186,6 +221,7 @@ function App() {
         onLoginSuccess={handleLoginSuccess}
         onLogout={handleLogout}
         onSearch={handleSearch}
+        showAlert={showAlert}
       />
 
       <div className="container">
@@ -212,6 +248,7 @@ function App() {
             onRemoveFromFavorites={handleRemoveFromFavorites}
             onDeleteRecipe={handleDeleteRecipe}
             user={user}
+            showAlert={showAlert}
           />
         )}
 
@@ -234,6 +271,7 @@ function App() {
             onSubmit={handleAddRecipe}
             onCancel={() => setCurrentView('list')}
             user={user}
+            showAlert={showAlert}
           />
         )}
       </div>

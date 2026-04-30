@@ -22,7 +22,7 @@ const difficulties = {
   hard: "Сложно"
 };
 
-const RecipeForm = ({ onSubmit, onCancel, user }) => {
+const RecipeForm = ({onSubmit, onCancel, user, showAlert}) => {
   const [recipe, setRecipe] = useState({
     name: '',
     description: '',
@@ -129,12 +129,12 @@ const RecipeForm = ({ onSubmit, onCancel, user }) => {
     e.preventDefault();
     
     if (!user) {
-      alert('Пожалуйста, войдите в систему');
+      if (showAlert) showAlert('Войдите в систему, чтобы добавить рецепт', 'warning');
       return;
     }
 
     if (!recipe.name.trim()) {
-      alert('Введите название рецепта');
+      if (showAlert) showAlert('Введите название рецепта', 'warning');
       return;
     }
 
@@ -142,12 +142,12 @@ const RecipeForm = ({ onSubmit, onCancel, user }) => {
     const validInstructions = recipe.instructions.filter(step => step.trim() !== '');
 
     if (validIngredients.length === 0) {
-      alert('Добавьте хотя бы один ингредиент');
+      if (showAlert) showAlert('Добавьте хотя бы один ингредиент', 'warning');
       return;
     }
 
     if (validInstructions.length === 0) {
-      alert('Добавьте хотя бы один шаг приготовления');
+      if (showAlert) showAlert('Добавьте хотя бы один шаг приготовления', 'warning');
       return;
     }
 
@@ -183,14 +183,14 @@ const RecipeForm = ({ onSubmit, onCancel, user }) => {
       const result = await response.json();
       
       if (response.ok) {
-        alert('Рецепт успешно добавлен!');
+        if (showAlert) showAlert('Рецепт успешно добавлен', 'success');
         onSubmit(result);
       } else {
-        alert(result.error || 'Ошибка при создании рецепта');
+        if (showAlert) showAlert(result.error || 'Ошибка при создании рецепта', 'error');
       }
     } catch (error) {
       console.error('Ошибка:', error);
-      alert('Ошибка при создании рецепта');
+      if (showAlert) showAlert('Ошибка соединения с сервером', 'error');
     } finally {
       setLoading(false);
     }
@@ -250,7 +250,7 @@ const RecipeForm = ({ onSubmit, onCancel, user }) => {
             </label>
             {mainImageName && (
               <div className="file-name">
-                📄 {mainImageName}
+                 {mainImageName}
               </div>
             )}
           </div>

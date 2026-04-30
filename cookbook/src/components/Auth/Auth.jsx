@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { authService } from '../../services/auth';
 import './Auth.css';
 
-const Auth = ({ onClose, onLoginSuccess }) => {
+const Auth = ({ onClose, onLoginSuccess, showAlert }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,16 +18,19 @@ const Auth = ({ onClose, onLoginSuccess }) => {
     try {
       if (isLogin) {
         const result = await authService.login(email, password);
+        if (showAlert) showAlert('Добро пожаловать, ' + result.user.name, 'success');
         onLoginSuccess(result.user);
         onClose();
       } else {
         await authService.register(email, password, name);
+        if (showAlert) showAlert('Регистрация успешна! Теперь войдите в систему', 'success');
         const result = await authService.login(email, password);
         onLoginSuccess(result.user);
         onClose();
       }
     } catch (err) {
       setError(err.error || 'Произошла ошибка');
+      if (showAlert) showAlert(err.error || 'Ошибка при входе', 'error');
     } finally {
       setLoading(false);
     }
