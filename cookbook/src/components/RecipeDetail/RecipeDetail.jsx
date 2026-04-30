@@ -2,24 +2,24 @@ import React from 'react';
 import './RecipeDetail.css';
 
 const categories = {
-  breakfast: "Завтрак",
-  lunch: "Обед",
-  dinner: "Ужин",
-  dessert: "Десерт"
+  breakfast: 'Завтрак',
+  lunch: 'Обед',
+  dinner: 'Ужин',
+  dessert: 'Десерт'
 };
 
 const cuisines = {
-  italian: "Итальянская",
-  russian: "Русская",
-  european: "Европейская",
-  american: "Американская",
-  international: "Международная"
+  italian: 'Итальянская',
+  russian: 'Русская',
+  european: 'Европейская',
+  american: 'Американская',
+  international: 'Международная'
 };
 
 const difficulties = {
-  easy: "Легко",
-  medium: "Средне",
-  hard: "Сложно"
+  easy: 'Легко',
+  medium: 'Средне',
+  hard: 'Сложно'
 };
 
 const RecipeDetail = ({ recipe, isFavorite, onBack, onAddToFavorites, onRemoveFromFavorites, onDeleteRecipe, user }) => {
@@ -34,9 +34,11 @@ const RecipeDetail = ({ recipe, isFavorite, onBack, onAddToFavorites, onRemoveFr
   const handleDeleteClick = async () => {
   if (window.confirm('Вы уверены, что хотите удалить этот рецепт?')) {
     try {
-      const response = await fetch(`http://localhost:3002/api/recipes/${recipe.id}`, {
+      const response = await fetch('http://localhost:3002/api/recipes/' + recipe.id, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({ user_id: user?.id })
       });
       
@@ -55,23 +57,62 @@ const RecipeDetail = ({ recipe, isFavorite, onBack, onAddToFavorites, onRemoveFr
   }
 };
 
-  const favoriteIcon = isFavorite ? "♥" : "♡";
-  const canDelete = recipe.user_id === user?.id;
+  const favoriteIcon = isFavorite ? '♥' : '♡';
+  
+  const canDelete = user && recipe.user_id === user.id;
 
-  // Получаем изображения шагов
-  const stepImages = recipe.step_images || [];
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith('http')) return imagePath;
+    return 'http://localhost:3002' + imagePath;
+  };
+
+  const mainImageUrl = getImageUrl(recipe.image);
+
+  let ingredientsArray = [];
+  if (Array.isArray(recipe.ingredients)) {
+    ingredientsArray = recipe.ingredients;
+  } else if (typeof recipe.ingredients === 'string') {
+    try {
+      ingredientsArray = JSON.parse(recipe.ingredients);
+    } catch(e) {
+      ingredientsArray = [];
+    }
+  }
+
+  let instructionsArray = [];
+  if (Array.isArray(recipe.instructions)) {
+    instructionsArray = recipe.instructions;
+  } else if (typeof recipe.instructions === 'string') {
+    try {
+      instructionsArray = JSON.parse(recipe.instructions);
+    } catch(e) {
+      instructionsArray = [];
+    }
+  }
+
+  let stepImagesArray = [];
+  if (Array.isArray(recipe.step_images)) {
+    stepImagesArray = recipe.step_images;
+  } else if (typeof recipe.step_images === 'string') {
+    try {
+      stepImagesArray = JSON.parse(recipe.step_images);
+    } catch(e) {
+      stepImagesArray = [];
+    }
+  }
 
   return (
     <div className="recipe-detail">
       <div className="detail-header">
-        <img 
-          src={recipe.image ? `http://localhost:3002${recipe.image}` : 'https://via.placeholder.com/800x400?text=No+Image'} 
-          alt={recipe.name} 
-          className="detail-image" 
-        />
+        {mainImageUrl ? (
+          <img src={mainImageUrl} alt={recipe.name} className="detail-image" />
+        ) : (
+          <div className="detail-image-placeholder">Нет изображения</div>
+        )}
         <div className="detail-header-buttons">
           <button className="detail-back" onClick={onBack}>
-            ← Назад
+            Назад
           </button>
           {canDelete && (
             <button className="delete-btn" onClick={handleDeleteClick}>
@@ -85,7 +126,9 @@ const RecipeDetail = ({ recipe, isFavorite, onBack, onAddToFavorites, onRemoveFr
         <div className="detail-title-row">
           <div>
             <h1 className="detail-title">{recipe.name}</h1>
-            <span className="author-name">Автор: {recipe.author_name || 'Пользователь'}</span>
+            {recipe.isUserRecipe && (
+              <span className="user-recipe-badge">Ваш рецепт</span>
+            )}
           </div>
           <button 
             className={`favorite-btn ${isFavorite ? 'active' : ''}`}
@@ -96,10 +139,10 @@ const RecipeDetail = ({ recipe, isFavorite, onBack, onAddToFavorites, onRemoveFr
         </div>
         
         <div className="detail-meta">
-          <span>Время: {recipe.cook_time} минут</span>
-          <span>Сложность: {difficulties[recipe.difficulty]}</span>
-          <span>Категория: {categories[recipe.category]}</span>
-          <span>Кухня: {cuisines[recipe.cuisine]}</span>
+          <span>Время: {recipe.cook_time || recipe.cookTime || 30} минут</span>
+          <span>Сложность: {difficulties[recipe.difficulty] || recipe.difficulty || 'Средне'}</span>
+          <span>Категория: {categories[recipe.category] || recipe.category || 'Обед'}</span>
+          <span>Кухня: {cuisines[recipe.cuisine] || recipe.cuisine || 'Русская'}</span>
         </div>
         
         {recipe.description && (
@@ -109,28 +152,36 @@ const RecipeDetail = ({ recipe, isFavorite, onBack, onAddToFavorites, onRemoveFr
         <div className="detail-section">
           <h2 className="section-title">Ингредиенты</h2>
           <ul className="ingredients-list">
-            {recipe.ingredients?.map((ingredient, index) => (
-              <li key={index}>{ingredient}</li>
-            ))}
+            {ingredientsArray.length > 0 ? (
+              ingredientsArray.map((ingredient, index) => (
+                <li key={index}>{ingredient}</li>
+              ))
+            ) : (
+              <li>Ингредиенты не указаны</li>
+            )}
           </ul>
         </div>
         
         <div className="detail-section">
-          <h2 className="section-title">Способ приготовления</h2>
+          <h2 className="section-title">Приготовление</h2>
           <div className="instructions-container">
-            {recipe.instructions?.map((instruction, index) => (
-              <div key={index} className="instruction-step">
-                <div className="step-number-large">{index + 1}</div>
-                <div className="step-content">
-                  <p className="step-text">{instruction}</p>
-                  {stepImages[index] && (
-                    <div className="step-image">
-                      <img src={`http://localhost:3002${stepImages[index]}`} alt={`Шаг ${index + 1}`} />
-                    </div>
-                  )}
+            {instructionsArray.length > 0 ? (
+              instructionsArray.map((instruction, index) => (
+                <div key={index} className="instruction-step">
+                  <div className="step-number-large">{index + 1}</div>
+                  <div className="step-content">
+                    <p className="step-text">{typeof instruction === 'string' ? instruction : instruction.text}</p>
+                    {stepImagesArray[index] && (
+                      <div className="step-image">
+                        <img src={'http://localhost:3002' + stepImagesArray[index]} alt={'Шаг ' + (index + 1)} />
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p>Инструкции не указаны</p>
+            )}
           </div>
         </div>
       </div>
